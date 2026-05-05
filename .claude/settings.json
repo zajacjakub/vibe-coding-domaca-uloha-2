@@ -1,0 +1,31 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(**)",
+        "Write(reports/**)",
+        "Edit(reports/**)",
+        "mcp__shopify-storefront__*",
+        "Bash(powershell -ExecutionPolicy Bypass -File .claude/scripts/fetch_products.ps1)",
+        "Bash(powershell -ExecutionPolicy Bypass -File .claude/scripts/fetch_articles.ps1)",
+        "Bash(powershell -ExecutionPolicy Bypass -File .claude/scripts/check_links.ps1)",
+        "Bash(pwsh -File .claude/scripts/fetch_products.ps1)",
+        "Bash(pwsh -File .claude/scripts/fetch_articles.ps1)",
+        "Bash(pwsh -File .claude/scripts/check_links.ps1)",
+        "Bash(Get-Date:*)",
+        "Bash(Get-Item:*)",
+        "Bash(New-Item -ItemType Directory -Path reports -Force)",
+        "Bash(powershell -ExecutionPolicy Bypass -File .claude/scripts/snapshot_status.ps1)",
+        "Bash(powershell -ExecutionPolicy Bypass -File .claude/scripts/check_urls.ps1:*)",
+        "Bash(pwsh -File .claude/scripts/snapshot_status.ps1)",
+        "Bash(pwsh -File .claude/scripts/check_urls.ps1:*)",
+        "Bash(Test-Path:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(git push:*)",
+      "Write(.mcp.json)"
+    ]
+  },
+  "env": {
+  }
+}

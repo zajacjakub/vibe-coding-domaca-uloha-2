@@ -1,0 +1,9 @@
+# Reports
+
+This directory holds generated audit reports.
+
+Subagents write markdown files here:
+- `products-YYYY-MM-DD.md` — product-content-auditor
+- `blog-YYYY-MM-DD.md` — blog-content-auditor
+
+Reports are listed in `.gitignore` by default. To keep audit history in version control, comment out the matching line in `.gitignore`.

@@ -1,0 +1,24 @@
+{
+  "shop": {
+    "url": "https://your-shop.example.com",
+    "name": "Your Brand"
+  },
+  "report": {
+    "language": "en"
+  },
+  "links": {
+    "cache_max_age_days": 7,
+    "whitelist_domains": [
+      "instagram.com",
+      "facebook.com",
+      "linkedin.com",
+      "twitter.com",
+      "x.com",
+      "tiktok.com",
+      "medium.com",
+      "t.co",
+      "bit.ly",
+      "goo.gl"
+    ]
+  }
+}
