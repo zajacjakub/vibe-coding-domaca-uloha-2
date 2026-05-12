@@ -12,10 +12,11 @@ Reports land in `reports/` as markdown, in your configured language.
 
 ## How it works
 
-Main Claude delegates to one of three subagents:
+Main Claude delegates to one of four subagents:
 
 - `product-content-auditor` and `blog-content-auditor` run on offline JSON snapshots produced by PowerShell scripts in `.claude/scripts/` (so they scale to full catalogs).
-- `shop-policies-auditor` runs live against the Storefront MCP (`search_shop_policies_and_faqs`) — content is small and stale answers carry legal cost.
+- `shop-policies-auditor` runs live: Playwright as the primary source (homepage footer + `/sitemap_pages_1.xml`) so it sees policies authored as regular Pages, plus the Storefront MCP (`search_shop_policies_and_faqs`) as a supplementary source for formal Shopify *Policies* under `/policies/*`. No snapshot — stale answers carry legal cost.
+- `storefront-ux-auditor` samples 10 products + 10 articles from local snapshots and drives Playwright against the live store to find template/theme-level bugs.
 
 `check_links.ps1` is shared by the offline auditors and dedupes URLs across products and articles.
 
