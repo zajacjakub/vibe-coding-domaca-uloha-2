@@ -20,6 +20,12 @@
       "bit.ly",
       "goo.gl"
     ]
+  },
+  "ux": {
+    "viewports": [375, 768, 1280],
+    "sample_size": { "products": 10, "articles": 10 },
+    "skip_flows": ["checkout-submit"],
+    "performance_budget_lcp_ms": 2500
   }
 }
 

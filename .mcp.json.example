@@ -3,6 +3,10 @@
     "shopify-storefront": {
       "type": "http",
       "url": "https://your-shop.example.com/api/mcp"
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest", "--headless"]
     }
   }
 }

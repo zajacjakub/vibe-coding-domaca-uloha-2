@@ -9,28 +9,29 @@ Manually checking grammar, dead links, typography and policies is impractical. T
 ## Architecture
 
 ```
-                       ┌──────────────────────┐
-                       │  Main Claude (orch.) │
-                       └──────────┬───────────┘
-                                  │ delegates
-        ┌──────────────────┬──────┴───────────┐
-        ▼                  ▼                  ▼
-┌──────────────────┐ ┌──────────────┐ ┌──────────────────┐
-│ product-content- │ │ blog-content │ │ shop-policies-   │
-│ auditor          │ │ -auditor     │ │ auditor          │
-│ (offline JSON)   │ │ (offline)    │ │ (live MCP)       │
-└──────────────────┘ └──────────────┘ └──────────────────┘
+                              ┌──────────────────────┐
+                              │  Main Claude (orch.) │
+                              └──────────┬───────────┘
+                                         │ delegates
+        ┌──────────────────┬──────────┬──┴───────────┬──────────────────┐
+        ▼                  ▼          ▼              ▼                  ▼
+┌──────────────────┐ ┌──────────────┐ ┌──────────────────┐ ┌──────────────────┐
+│ product-content- │ │ blog-content │ │ shop-policies-   │ │ storefront-ux-   │
+│ auditor          │ │ -auditor     │ │ auditor          │ │ auditor          │
+│ (offline JSON)   │ │ (offline)    │ │ (live MCP)       │ │ (live Playwright)│
+└──────────────────┘ └──────────────┘ └──────────────────┘ └──────────────────┘
 ```
 
-The product and blog auditors are backed by an offline pipeline in `.claude/scripts/` so they scale to full catalogs without overflowing context. Each orchestrates its own snapshot script plus the shared `check_links.ps1`, which dedupes URLs across products and articles. The policies agent runs live against the Storefront MCP — content there is small enough that snapshotting would only add staleness.
+The product and blog auditors are backed by an offline pipeline in `.claude/scripts/` so they scale to full catalogs without overflowing context. Each orchestrates its own snapshot script plus the shared `check_links.ps1`, which dedupes URLs across products and articles. The policies agent runs live against the Storefront MCP — content there is small enough that snapshotting would only add staleness. The UX auditor samples 10 products + 10 articles from the local snapshots and drives a real browser via the Playwright MCP — content audit is delegated to the other agents, so this one focuses on template/theme-level bugs.
 
 ## MCP servers
 
 | Server | Type | Used by | Purpose |
 |---|---|---|---|
 | `shopify-storefront` | HTTP, no auth | `shop-policies-auditor` | Live policies / FAQ search via `search_shop_policies_and_faqs` |
+| `playwright` | stdio (`npx @playwright/mcp`) | `storefront-ux-auditor` | Headless-browser navigation, click, evaluate, snapshot, screenshot |
 
-URL is configured per store via `.mcp.json`. The committed `.mcp.json.example` is the template; the local `.mcp.json` is gitignored.
+URL / launch is configured per store via `.mcp.json`. The committed `.mcp.json.example` is the template; the local `.mcp.json` is gitignored.
 
 ## Subagents
 
@@ -39,6 +40,7 @@ URL is configured per store via `.mcp.json`. The committed `.mcp.json.example` i
 | `product-content-auditor` | `.claude/agents/product-content-auditor.md` | "audit products" — runs over `data/products.json` + `data/bad_links.json` snapshots |
 | `blog-content-auditor` | `.claude/agents/blog-content-auditor.md` | "audit blog" — runs over `data/articles.json` + `data/bad_links.json` snapshots |
 | `shop-policies-auditor` | `.claude/agents/shop-policies-auditor.md` | "audit policies", "audit FAQ" — live MCP, no snapshot |
+| `storefront-ux-auditor` | `.claude/agents/storefront-ux-auditor.md` | "audit ux", "audit storefront ux", "ui audit" — samples 10 products + 10 articles, drives Playwright MCP |
 
 ## Skills
 
@@ -46,6 +48,7 @@ URL is configured per store via `.mcp.json`. The committed `.mcp.json.example` i
 |---|---|
 | `language-proofreading` | Universal typography rules + per-language packs (en, sk, cs, de, fr, es) |
 | `shopify-content-rules` | Length limits, alt text rules, Shopify structure |
+| `ecommerce-ux-checks` | Sampling strategy (10 products + 10 articles, bucketed) and template-level check catalog used by the UX auditor |
 
 ## Configuration
 
@@ -58,7 +61,7 @@ Both are gitignored.
 
 ### Orchestrator setup check — required before delegating to any audit subagent
 
-Subagents (`product-content-auditor`, `blog-content-auditor`, `shop-policies-auditor`) **cannot ask the user for input directly** — they only have a conversation channel with the orchestrator (main Claude). Before delegating to any of them, the orchestrator must verify `audit.config.json` exists at the repo root with these fields populated:
+Subagents (`product-content-auditor`, `blog-content-auditor`, `shop-policies-auditor`, `storefront-ux-auditor`) **cannot ask the user for input directly** — they only have a conversation channel with the orchestrator (main Claude). Before delegating to any of them, the orchestrator must verify `audit.config.json` exists at the repo root with these fields populated:
 
 - `shop.url` — must include scheme (`https://...` or `http://...`)
 - `shop.name` — non-empty
@@ -83,6 +86,9 @@ claude "audit blog with fresh snapshot"
 
 # Live MCP audit (no offline cache)
 claude "audit policies"   # Storefront MCP search_shop_policies_and_faqs
+
+# UX / template audit — samples 10 products + 10 articles, drives Playwright MCP
+claude "audit ux"         # uses local snapshots only for sampling; live browser for checks
 
 # Or run the offline scripts manually if you want to inspect the JSONs first
 .\.claude\scripts\fetch_products.ps1
