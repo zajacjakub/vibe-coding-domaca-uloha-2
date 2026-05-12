@@ -1,12 +1,13 @@
 # Shopify Content Audit Toolkit
 
-Claude Code toolkit that audits any Shopify store for grammar, typography, dead links, and alt texts. Store-agnostic — point at any shop, set a language, run.
+Claude Code toolkit that audits any Shopify store for grammar, typography, dead links, alt texts and ecommerce ux. Store-agnostic — point at any shop, set a language, run.
 
 ## What it audits
 
 - **Products** — descriptions, alt texts, dead links, empty fields
 - **Blog articles** — readability, heading structure, outdated phrases, internal links
 - **Policies & FAQ** — grammar, dead links, contact-info consistency, outdated dates
+- **Storefront UX** — template/theme-level bugs: critical purchase path, product & article rendering, responsive layout, accessibility baseline, performance smoke, error pages
 
 Reports land in `reports/` as markdown, in your configured language.
 
@@ -46,10 +47,11 @@ In `.mcp.json` replace the placeholder URL with your store URL. Then open the pr
 audit products    # → reports/products-YYYY-MM-DD.md
 audit blog        # → reports/blog-YYYY-MM-DD.md
 audit policies    # → reports/policies-YYYY-MM-DD.md
-audit all         # runs all three audits
+audit ux          # → reports/ux-YYYY-MM-DD.md
+audit all         # runs all four audits
 ```
 
-Each agent reads `audit.config.json`, refreshes its snapshot if older than 24h, then writes a report.
+Each agent reads `audit.config.json`, refreshes its snapshot if older than 24h, then writes a report. The UX auditor reuses the product and article snapshots for its sample (10 + 10) and drives a live browser via the Playwright MCP — make sure `npx @playwright/mcp` can run (`npx playwright install chromium` on first use).
 
 **Cache controls (offline only):**
 - `audit products with fresh snapshot` — force refresh
@@ -68,6 +70,7 @@ Run the scripts manually to inspect snapshots:
 
 - `language-proofreading` — typography rules + packs for en, sk, cs, de, fr, es. Add a language by editing `.claude/skills/language-proofreading/SKILL.md`.
 - `shopify-content-rules` — length limits, alt text rules, Shopify structure.
+- `ecommerce-ux-checks` — sampling strategy (10 products + 10 articles, bucketed) and per-template check catalog used by the UX auditor.
 
 ## Configuration
 
