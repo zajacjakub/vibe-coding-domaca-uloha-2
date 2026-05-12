@@ -6,13 +6,15 @@ audit.config.json
 data/
 
 # Audit outputs (uncomment to keep reports as history)
-reports/*.md
+reports/
 !reports/.gitkeep
 
 # Claude Code local-only settings
 .claude/projects/
 .claude/local-settings.json
 .claude/settings.local.json
+
+.playwright-mcp/
 
 # OS
 .DS_Store
